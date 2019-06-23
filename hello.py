@@ -21,9 +21,7 @@ def getImageStats(filepath):
     img_size = image.size
     width = img_size[0]
     height = img_size[1]
-
     result_errors = []
-
     for x in range(height):
         for y in range(width):
             rgb = img_pixels[y,x]
@@ -31,17 +29,19 @@ def getImageStats(filepath):
             if err != None: # found in dict
                 # print(err)
                 result_errors.append(err)
+
     mean, std = np.mean(result_errors), np.std(result_errors)
     diffs = []
     for index in range(len(result_errors)):
         diffs.append((result_errors[index] - mean))
+
     return (std, diffs)
+
 
 def cor(stats1, stats2): #0: std, 1: diffs
     topSum = 0
     for index in range(len(stats1[1])):
         topSum += stats1[1][index] * stats2[1][index]
-    print("Stats: {}, / {}, 1/2 = {} & {}".format(topSum, len(stats1[1])-1, stats1[0], stats2[0]))
 
     topSum /= (len(stats1[1])-1)
     return (topSum / (stats1[0] * stats2[0]) )
@@ -52,16 +52,10 @@ def main():
     if len(sys.argv) != 3: #change to 3
         print("ERROR: Usage - python3 {} img1 img2".format(sys.argv[0]))
         sys.exit()
-    print(sys.argv[1])
-    print(sys.argv[2])
     img1 = getImageStats(sys.argv[1])
     img2 = getImageStats(sys.argv[2])
-    print(img2[0])
-    print(img1[0])
     correlationCoefficient = cor(img1, img2)
     print(correlationCoefficient)
-
-
 
 if __name__ == "__main__":
     main()
