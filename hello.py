@@ -3,16 +3,16 @@ import numpy as np
 from PIL import Image
 
 error_vals = { # middle of error range that the rgb value represents
-    (49,  54, 149): 0.03125*3.0,
-    (69, 117, 180): 0.09375*3.0,
-    (116, 173, 209): 0.1875*3.0,
-    (171, 217, 233): 0.375*3.0,
-    (224, 243, 248): 0.75*3.0,
-    (254, 224, 144): 1.5*3.0,
-    (253, 174,  97): 3.0*3.0,
-    (244, 109,  67): 6.0*3.0,
-    (215,  48,  39): 12.0*3.0,
-    (165,   0,  38): 24.0*3.0,
+    (49,  54, 149): 0.09375, 
+    (69, 117, 180): 0.28125,
+    (116, 173, 209): 0.5625,
+    (171, 217, 233): 1.125,
+    (224, 243, 248): 2.25,
+    (254, 224, 144): 4.5,
+    (253, 174,  97): 9.0,
+    (244, 109,  67): 18.0,
+    (215,  48,  39): 36.0,
+    (165,   0,  38): 72.0
 }
 
 def getImageStats(filepath):
@@ -27,35 +27,32 @@ def getImageStats(filepath):
             rgb = img_pixels[y,x]
             err = error_vals.get(rgb)
             if err != None: # found in dict
-                # print(err)
                 result_errors.append(err)
 
-    mean, std = np.mean(result_errors), np.std(result_errors)
+    mean, std = np.mean(result_errors)*0, np.std(result_errors) # x *0
+    print("Image filepath: {} \n\tStats (X3)...\t MEAN: {}\t STD: {}\n".format(filepath, mean, std))
+    '''
     diffs = []
     for index in range(len(result_errors)):
         diffs.append((result_errors[index] - mean))
+    '''
+    return (std, result_errors) # IMPORTANT MODIFICATION: using result_errors correlates errors, using diffs correlates location of errors
 
-    return (std, diffs)
 
-
-def cor(stats1, stats2): #0: std, 1: diffs
-    topSum = 0
-    for index in range(len(stats1[1])):
-        topSum += stats1[1][index] * stats2[1][index]
-
-    topSum /= (len(stats1[1])-1)
-    return (topSum / (stats1[0] * stats2[0]) )
+def cor(stats1, stats2): # 0: std, 1: diffs
+    topSum = np.dot(np.array(stats1[1]), np.array(stats2[1])) # multiply together the difference to mean from both lists for each index to get sum for numerator of correlation coefficient equation
+    topSum /= (len(stats1[1])-1) # divide by degrees of freedom
+    return (topSum / (stats1[0] * stats2[0])) # divide by denominator (the two standard deviations)
 
 
 def main():
-    # python(3) hello.py algo1 algo2
-    if len(sys.argv) != 3: #change to 3
+    if len(sys.argv) != 3:
         print("ERROR: Usage - python3 {} img1 img2".format(sys.argv[0]))
         sys.exit()
-    img1 = getImageStats(sys.argv[1])
-    img2 = getImageStats(sys.argv[2])
-    correlationCoefficient = cor(img1, img2)
-    print(correlationCoefficient)
+    imgStats1 = getImageStats(sys.argv[1]) #first image
+    imgStats2 = getImageStats(sys.argv[2]) #second image
+    correlationCoefficient = cor(imgStats1, imgStats2)
+    print("Correlation coefficient for the two images: {}".format(correlationCoefficient))
 
 if __name__ == "__main__":
     main()
