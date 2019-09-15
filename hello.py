@@ -97,7 +97,7 @@ def main():
         imgStats2 = getGreyscaleStats(dispImages2[index])
         # print("Correlation coefficient for the two images: {}".format(correlationCoefficient))
         corList.append(cor(imgStats1, imgStats2))
-
+    
     # print(corList)
     print(np.mean(corList))
 
