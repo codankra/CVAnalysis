@@ -32,16 +32,18 @@ def getImageStats(filepath):
     img_size = image.size
     width = img_size[0]
     height = img_size[1]
+    print(height)
     result_errors = []
     for x in range(height):
         for y in range(width):
             rgb = img_pixels[y,x]
             err = error_vals.get(rgb)
+            # print(rgb)
             if err != None: # found in dict
                 result_errors.append(err)
 
     mean, std = np.mean(result_errors), np.std(result_errors) # x *0
-    print("Image filepath: {} \n\tStats (X3)...\t MEAN: {}\t STD: {}\n".format(filepath, mean, std))
+    # print("Image filepath: {} \n\tStats (X3)...\t MEAN: {}\t STD: {}\n".format(filepath, mean, std))
     
     diffs = []
     for index in range(len(result_errors)):
@@ -78,23 +80,32 @@ def cor(stats1, stats2): # 0: std, 1: diffs
 
 
 def main():
-    if len(sys.argv) != 3:
-        print("ERROR: Usage - python3 {} method algorithm1 algorithm2".format(sys.argv[0]))
+    if len(sys.argv) != 4:
+        print("ERROR: Usage - python3 {} type[error/disp] algorithm1 algorithm2".format(sys.argv[0]))
         sys.exit()
     
-    errorImages1 = glob.glob("{}/*_errors_img.png".format(sys.argv[1])) #glob lists images in an arbitrary order that is consistent for similar queries
-    errorImages2 = glob.glob("{}/*_errors_img.png".format(sys.argv[2])) #so this usage is sketchy but fit for our purposes
+    errorImages1 = glob.glob("{}/*_errors_img.png".format(sys.argv[2])) #glob lists images in an arbitrary order that is consistent for similar queries
+    errorImages2 = glob.glob("{}/*_errors_img.png".format(sys.argv[3])) #so this usage is sketchy but fit for our purposes
     #error images will be used later on, once more steps are done to analyze them
-    dispImages1 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[1]))
-    dispImages2 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[2]))
-    '''print(errorImages1)
-    print(errorImages2)
+    dispImages1 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[2]))
+    dispImages2 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[3]))
+    print(errorImages1)
+    '''print(errorImages2)
     print(dispImages1)
     print(dispImages2)'''
     corList = [] * 20
     for index in range(len(dispImages1)): #both globs expected to have same range and order
-        imgStats1 = getGreyscaleStats(dispImages1[index])
-        imgStats2 = getGreyscaleStats(dispImages2[index])
+        # Use next two lines for correlating heatmaps
+        imgStats1 = None
+        imgStats2 = None
+        if (sys.argv[1] == "error"):
+            imgStats1 = getImageStats(errorImages1[index])
+            imgStats2 = getImageStats(errorImages2[index])
+        elif (sys.argv[1] == "heat"):
+            imgStats1 = getGreyscaleStats(dispImages1[index])
+            imgStats2 = getGreyscaleStats(dispImages2[index])
+        else:
+            print("ERROR: type of images being correlated is unknown: {}".format(sys.argv[1]))
         # print("Correlation coefficient for the two images: {}".format(correlationCoefficient))
         corList.append(cor(imgStats1, imgStats2))
     
