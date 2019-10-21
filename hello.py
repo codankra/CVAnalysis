@@ -26,7 +26,7 @@ error_vals = { # middle of error range that the rgb value represents
 # getImageStats is fine for disparities (Nate) - change .get(rgb) to .get(scale[0-255])
 # make new function to handle Jason's images (Jason)
 
-def getImageStats(filepath):
+def getImageStats2012(filepath):
     image = Image.open(filepath)
     img_pixels = image.convert('RGB').load()
     img_size = image.size
@@ -49,7 +49,33 @@ def getImageStats(filepath):
     for index in range(len(result_errors)):
         diffs.append((result_errors[index] - mean))
 
-    return (std, diffs) # IMPORTANT MODIFICATION: using result_errors correlates errors, using diffs correlates location of errors
+    return (std, diffs)
+
+
+def getImageStats(filepath, gtArray):
+    image = Image.open(filepath)
+    img_pixels = image.convert('RGB').load()
+    img_size = image.size
+    width = img_size[0]
+    height = img_size[1]
+    print(height)
+    result_errors = []
+    for x in range(height):
+        for y in range(width):
+            rgb = img_pixels[y,x]
+            err = error_vals.get(rgb)
+            # print(rgb)
+            if(gtArray[x*y + y]): # ground truth detected at this spot
+                result_errors.append(err)
+
+    mean, std = np.mean(result_errors), np.std(result_errors) # x *0
+    # print("Image filepath: {} \n\tStats (X3)...\t MEAN: {}\t STD: {}\n".format(filepath, mean, std))
+    
+    diffs = []
+    for index in range(len(result_errors)):
+        diffs.append((result_errors[index] - mean))
+
+    return (std, diffs)
 
 
 def getGreyscaleStats(filepath):
