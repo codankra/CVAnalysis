@@ -1,0 +1,12 @@
+# Setup
+settings.json
+env/**
+.vscode/**
+__pycache__/**
+
+# Notes files
+string.txt
+notes.txt
+
+# Scraping code/ Images
+CVdata/**
