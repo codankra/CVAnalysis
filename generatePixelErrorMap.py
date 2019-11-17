@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import matplotlib.pylab as plt
 from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 import glob
@@ -36,21 +37,26 @@ def generateDisparityErrorMap(err_file, heatmap_file):
     height = img_size[1]
     disp_err_map = {}
     errCount=0
-
+    disp_map= {}
     # for key in error_vals.keys():
     #     disp_err_map[key] = 0
     #initialize each disparity to 0 errors
     for index in range(256):
         disp_err_map[index] = 0
+        disp_map[index] = 0
     for x in range(height): #loop through disparity map
         for y in range(width):
             rgb = err_pixels[y,x]
+            disp = disps[y,x]
             err = error_vals.get(rgb) #Get error at this point (same spot in err_map)
+            disp_map[disp] = disp_map[disp] + 1
             if(err != None and err>3): # Is there a significant error at this pixel? err != None: found in dict
-                disp = disps[y,x]
                 disp_err_map[disp] = disp_err_map[disp]+1 #increment error count for current disp
                 errCount = errCount + 1
-    return (errCount,disp_err_map)
+    percentsList = []
+    for index in range(256):
+        percentsList.append (disp_err_map[index]/(disp_map[index] + .00001))
+    return (errCount,disp_err_map, disp_map, percentsList)
 
 
 
@@ -60,7 +66,14 @@ def main():
         sys.exit()
     stats = generateDisparityErrorMap(sys.argv[1], sys.argv[2])
     print(stats[1])
+    print("-------------------")
+    print(stats[2])
+    print("================")
+    print(stats[3])
     print("Total Number of errors: {}".format(stats[0]))
+    # percents = sorted(stats[3].items())
+    plt.plot(stats[3])
+    plt.show()
 
 if __name__ == "__main__":
     main()
