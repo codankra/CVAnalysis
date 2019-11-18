@@ -3,6 +3,10 @@ import numpy as np
 from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 import glob
+import json
+
+json_file = open('generators/GTLists.txt')
+GTLists = json.load(json_file)
 
 error_vals = { # middle of error range that the rgb value represents
     (49,  54, 149): 0.09375, 
@@ -26,7 +30,7 @@ error_vals = { # middle of error range that the rgb value represents
 # getImageStats is fine for disparities (Nate) - change .get(rgb) to .get(scale[0-255])
 # make new function to handle Jason's images (Jason)
 
-def getImageStats2012(filepath):
+def getImageStats2015(filepath):
     image = Image.open(filepath)
     img_pixels = image.convert('RGB').load()
     img_size = image.size
@@ -51,23 +55,20 @@ def getImageStats2012(filepath):
 
     return (std, diffs)
 
-
-def getImageStats(filepath, gtArray):
+# 2012 version: the error maps are in mostly grayscale so GTLists are needed
+def getImageStats(filepath, numTest):
     image = Image.open(filepath)
-    img_pixels = image.convert('RGB').load()
+    img_pixels = image.convert('L').load()
+    gtArray = list(Image.open("generators/Bitmaps/Bitmap_{}.PBM".format(numTest)).getdata())
     img_size = image.size
     width = img_size[0]
     height = img_size[1]
-    print(height)
     result_errors = []
     for x in range(height):
         for y in range(width):
-            rgb = img_pixels[y,x]
-            err = error_vals.get(rgb)
-            # print(rgb)
             if(gtArray[x*y + y]): # ground truth detected at this spot
-                result_errors.append(err)
-
+                # print(img_pixels[y,x])
+                result_errors.append(img_pixels[y,x])
     mean, std = np.mean(result_errors), np.std(result_errors) # x *0
     # print("Image filepath: {} \n\tStats (X3)...\t MEAN: {}\t STD: {}\n".format(filepath, mean, std))
     
@@ -106,17 +107,17 @@ def cor(stats1, stats2): # 0: std, 1: diffs
 
 
 def main():
-    if len(sys.argv) != 4:
-        print("ERROR: Usage - python3 {} type[error/disp] algorithm1 algorithm2".format(sys.argv[0]))
+    if len(sys.argv) != 5:
+        print("ERROR: Usage - python3 {} type[error/disp] year algorithm1 algorithm2".format(sys.argv[0]))
         sys.exit()
     
-    errorImages1 = glob.glob("{}/*_errors_img.png".format(sys.argv[2])) #glob lists images in an arbitrary order that is consistent for similar queries
-    errorImages2 = glob.glob("{}/*_errors_img.png".format(sys.argv[3])) #so this usage is sketchy but fit for our purposes
+    errorImages1 = glob.glob("{}/*_errors_img.png".format(sys.argv[3])) #glob lists images in an arbitrary order that is consistent for similar queries
+    errorImages2 = glob.glob("{}/*_errors_img.png".format(sys.argv[4])) #so this usage is sketchy but fit for our purposes
     #error images will be used later on, once more steps are done to analyze them
-    dispImages1 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[2]))
-    dispImages2 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[3]))
-    print(errorImages1)
-    '''print(errorImages2)
+    dispImages1 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[3]))
+    dispImages2 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[4]))
+    '''print(errorImages1)
+    print(errorImages2)
     print(dispImages1)
     print(dispImages2)'''
     corList = [] * 20
@@ -124,9 +125,14 @@ def main():
         # Use next two lines for correlating heatmaps
         imgStats1 = None
         imgStats2 = None
-        if (sys.argv[1] == "error"):
-            imgStats1 = getImageStats(errorImages1[index])
-            imgStats2 = getImageStats(errorImages2[index])
+        if (sys.argv[1] == "error" and sys.argv[2] == "2012"):
+            numTest = errorImages1[index][errorImages1[index].rfind('/')+1:errorImages1[index].index("_", errorImages1[index].rfind('/'))]
+            # Splits image file path between last / and first _ to find #
+            imgStats1 = getImageStats(errorImages1[index], numTest)
+            imgStats2 = getImageStats(errorImages2[index], numTest)
+        elif (sys.argv[1] == "error" and sys.argv[2] == "2015"):
+            imgStats1 = getImageStats2015(errorImages1[index])
+            imgStats2 = getImageStats2015(errorImages2[index])
         elif (sys.argv[1] == "heat"):
             imgStats1 = getGreyscaleStats(dispImages1[index])
             imgStats2 = getGreyscaleStats(dispImages2[index])

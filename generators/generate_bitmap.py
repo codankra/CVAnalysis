@@ -6,7 +6,7 @@ import glob
 import os
 rootdir = os.getcwd()
 np.set_printoptions(threshold=sys.maxsize)
-​
+
 # Function to get all the images we want
 def selectAllImages(imageNum):
     element = 0
@@ -24,7 +24,7 @@ def selectAllImages(imageNum):
 # Function to check if each pixel has GT
 def checkGT(imgArray, height, width):
     GT = []
-​
+
     # For every pixel, we check for each image if it is equal to (0,0,0). If any single image is not (Indicating GT exists), 
     # then we append 1 to the array of GT pixels, otherwise we append 0
     for x in range(height):
@@ -71,6 +71,7 @@ def main():
         sys.exit()
     # Get a list of all the images needed and also width/height of the images
     imgList = selectAllImages(sys.argv[1])
+    print(sys.argv[1])
     dummyImage = imgList[0]
     img_size = dummyImage.size
     width = img_size[0]
@@ -80,9 +81,9 @@ def main():
     truthPixels = np.append([], truthList).astype(np.uint8)
     img = Image.fromarray(truthPixels.reshape(height, width), 'L')
     img.save("./Bitmaps/Bitmap_{}.PBM".format(sys.argv[1]))
-​
+
     print(len(truthList))
     print(truthList.count(1)/ len(truthList))
-​
+
 if __name__ == "__main__":
     main()
