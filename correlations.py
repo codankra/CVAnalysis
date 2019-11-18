@@ -102,16 +102,24 @@ def cor(stats1, stats2): # 0: std, 1: diffs
     return (topSum / (stats1[0] * stats2[0])) # divide by denominator (the two standard deviations)
 
 
+
 def main():
     if len(sys.argv) != 5:
         print("ERROR: Usage - python3 {} type[error/disp] year algorithm1 algorithm2".format(sys.argv[0]))
         sys.exit()
-    
-    errorImages1 = glob.glob("{}/*_errors_img.png".format(sys.argv[3])) #glob lists images in an arbitrary order that is consistent for similar queries
-    errorImages2 = glob.glob("{}/*_errors_img.png".format(sys.argv[4])) #so this usage is sketchy but fit for our purposes
+
+    fileEndingError= "{}/*_errors_img.png"
+    fileEndingImg = "{}/*_disp_ipol.png"
+
+    if sys.argv[2] == '2015':
+        fileEndingError = "{}/*_errors_disp_img_0.png"
+        fileEndingImg2015 = "{}/*_result_disp_img_0.png"
+
+    errorImages1 = glob.glob("{}/*_errors_img_0.png".format(sys.argv[3])) #glob lists images in an arbitrary order that is consistent for similar queries
+    errorImages2 = glob.glob("{}/*_errors_img_0.png".format(sys.argv[4])) #so this usage is sketchy but fit for our purposes
     #error images will be used later on, once more steps are done to analyze them
-    dispImages1 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[3]))
-    dispImages2 = glob.glob("{}/*_disp_ipol.png".format(sys.argv[4]))
+    dispImages1 = glob.glob("{}/*_result_disp_img_0.png".format(sys.argv[3]))
+    dispImages2 = glob.glob("{}/*_result_disp_img_0.png".format(sys.argv[4]))
     '''print(errorImages1)
     print(errorImages2)
     print(dispImages1)
