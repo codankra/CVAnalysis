@@ -3,10 +3,6 @@ import numpy as np
 from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 import glob
-import json
-
-json_file = open('generators/GTLists.txt')
-GTLists = json.load(json_file)
 
 error_vals = { # middle of error range that the rgb value represents
     (49,  54, 149): 0.09375, 
