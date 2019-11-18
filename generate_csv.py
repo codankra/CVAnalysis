@@ -13,7 +13,10 @@ if __name__ == "__main__":
         filewriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         root_of_photos = sys.argv[4]
         #used a json array instead of read directory name to maintain the order that the output is displayed
-        with open('AlgorithmNames.json', 'r') as data_file:
+        jsonFile = 'AlgorithmNames2012.json'
+        if sys.argv[2] == '2015':
+            jsonFile = 'AlgorithmNames2015.json'
+        with open(jsonFile, 'r') as data_file:
             json_data = data_file.read()
         photos = json.loads(json_data)
         photos.insert(0,'')
